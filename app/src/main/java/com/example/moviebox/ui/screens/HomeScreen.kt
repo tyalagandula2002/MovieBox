@@ -17,44 +17,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.moviebox.data.MovieInfo
+import com.example.moviebox.data.sampleMovies
 
-private val Gold = Color(0xFFFFD700)
-private val Purple = Color(0xFF38205E)
-
-private data class Movie(
-    val title: String,
-    val year: String,
-    val genre: String,
-    val rating: String,
-    val description: String
-)
-
-private val movies = listOf(
-    Movie(
-        "Interstellar", "2014", "Sci-Fi", "8.7",
-        "Explorers travel through space to save humanity."
-    ),
-    Movie(
-        "Inception", "2010", "Sci-Fi", "8.8",
-        "A thief enters people's dreams to steal secrets."
-    ),
-    Movie(
-        "The Dark Knight", "2008", "Action", "9.0",
-        "Batman faces the dangerous criminal Joker."
-    ),
-    Movie(
-        "Oppenheimer", "2023", "Drama", "8.3",
-        "The story of the scientist behind the atomic bomb."
-    )
-)
+private val HomeGold = Color(0xFFFFD700)
+private val HomePurple = Color(0xFF38205E)
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onReviewsClick: () -> Unit,
+    onWriteReview: (MovieInfo) -> Unit
+) {
 
-    var page by remember { mutableStateOf("home") }
+    var showMovies by remember { mutableStateOf(false) }
     var search by remember { mutableStateOf("") }
+
     var selectedMovie by remember {
-        mutableStateOf<Movie?>(null)
+        mutableStateOf<MovieInfo?>(null)
     }
 
     val gradient = Brush.verticalGradient(
@@ -75,16 +54,16 @@ fun HomeScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        if (page == "home") {
+        if (!showMovies) {
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             Text(
                 text = "🎬",
-                fontSize = 70.sp
+                fontSize = 65.sp
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = "Welcome to MovieBox",
@@ -102,39 +81,39 @@ fun HomeScreen() {
                 color = Color(0xFFFFE4B5)
             )
 
-            Spacer(modifier = Modifier.height(35.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             Text(
                 text = "⭐ Featured Movie",
-                fontSize = 23.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
 
             Spacer(modifier = Modifier.height(15.dp))
 
-            MovieCard(
-                movie = movies[0],
+            HomeMovieCard(
+                movie = sampleMovies[0],
                 onClick = {
-                    selectedMovie = movies[0]
+                    selectedMovie = sampleMovies[0]
                 }
             )
 
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(
-                onClick = { page = "movies" },
+                onClick = { showMovies = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(55.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Gold,
-                    contentColor = Purple
+                    containerColor = HomeGold,
+                    contentColor = HomePurple
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "Explore Movies",
+                    "Explore Movies",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -143,24 +122,25 @@ fun HomeScreen() {
             Spacer(modifier = Modifier.height(15.dp))
 
             OutlinedButton(
-                onClick = { page = "reviews" },
+                onClick = onReviewsClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(55.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Text(
-                    text = "My Reviews",
+                    "My Reviews",
                     color = Color.White,
                     fontSize = 17.sp
                 )
             }
-        }
 
-        if (page == "movies") {
+        } else {
 
-            BackButton {
-                page = "home"
+            TextButton(
+                onClick = { showMovies = false }
+            ) {
+                Text("← Back to Home", color = Color.White)
             }
 
             Text(
@@ -177,26 +157,31 @@ fun HomeScreen() {
                 onValueChange = { search = it },
                 label = { Text("Search Movies") },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedBorderColor = HomeGold,
+                    unfocusedBorderColor = Color.White,
+                    focusedLabelColor = HomeGold,
+                    unfocusedLabelColor = Color.White
+                )
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            val filteredMovies = movies.filter { movie ->
-                movie.title.contains(search, ignoreCase = true) ||
-                        movie.genre.contains(search, ignoreCase = true)
+            val filteredMovies = sampleMovies.filter {
+                it.title.contains(search, ignoreCase = true) ||
+                        it.genre.contains(search, ignoreCase = true)
             }
 
             if (filteredMovies.isEmpty()) {
-                Text(
-                    text = "No movies found",
-                    color = Color.White
-                )
+                Text("No movies found", color = Color.White)
             }
 
             filteredMovies.forEach { movie ->
 
-                MovieCard(
+                HomeMovieCard(
                     movie = movie,
                     onClick = {
                         selectedMovie = movie
@@ -205,37 +190,6 @@ fun HomeScreen() {
 
                 Spacer(modifier = Modifier.height(12.dp))
             }
-        }
-
-        if (page == "reviews") {
-
-            BackButton {
-                page = "home"
-            }
-
-            Spacer(modifier = Modifier.height(50.dp))
-
-            Text(
-                text = "📝",
-                fontSize = 65.sp
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "My Reviews",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Text(
-                text = "No reviews yet!",
-                fontSize = 18.sp,
-                color = Color.White
-            )
         }
     }
 
@@ -263,6 +217,16 @@ fun HomeScreen() {
                 TextButton(
                     onClick = {
                         selectedMovie = null
+                        onWriteReview(movie)
+                    }
+                ) {
+                    Text("Write Review")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        selectedMovie = null
                     }
                 ) {
                     Text("Close")
@@ -273,8 +237,8 @@ fun HomeScreen() {
 }
 
 @Composable
-private fun MovieCard(
-    movie: Movie,
+private fun HomeMovieCard(
+    movie: MovieInfo,
     onClick: () -> Unit
 ) {
 
@@ -282,7 +246,7 @@ private fun MovieCard(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                Purple,
+                HomePurple,
                 RoundedCornerShape(18.dp)
             )
             .clickable { onClick() }
@@ -293,7 +257,7 @@ private fun MovieCard(
             text = "🎥 ${movie.title}",
             fontSize = 21.sp,
             fontWeight = FontWeight.Bold,
-            color = Gold
+            color = HomeGold
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -314,23 +278,8 @@ private fun MovieCard(
 
         Text(
             text = "Tap to view details",
-            color = Gold,
+            color = HomeGold,
             fontSize = 12.sp
-        )
-    }
-}
-
-@Composable
-private fun BackButton(
-    onClick: () -> Unit
-) {
-    TextButton(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = "← Back to Home",
-            color = Color.White
         )
     }
 }

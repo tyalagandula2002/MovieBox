@@ -1,6 +1,7 @@
 
 package com.example.moviebox.ui.screens
 
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +29,8 @@ fun ReviewScreen(
     onBack: () -> Unit
 ) {
 
+    val context = LocalContext.current
+
     val gold = Color(0xFFFFD700)
     val purple = Color(0xFF38205E)
 
@@ -36,17 +40,28 @@ fun ReviewScreen(
         )
     }
 
-    var stars by remember { mutableIntStateOf(0) }
-    var reviewText by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-    var editingIndex by remember { mutableIntStateOf(-1) }
+    var stars by remember {
+        mutableIntStateOf(0)
+    }
+
+    var reviewText by remember {
+        mutableStateOf("")
+    }
+
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+
+    var editingIndex by remember {
+        mutableIntStateOf(-1)
+    }
 
     BackHandler {
         onBack()
     }
 
     val gradient = Brush.verticalGradient(
-        listOf(
+        colors = listOf(
             Color(0xFF38205E),
             Color(0xFF8155A5),
             Color(0xFFFFC76D)
@@ -63,12 +78,19 @@ fun ReviewScreen(
             .padding(24.dp)
     ) {
 
-        TextButton(onClick = onBack) {
-            Text("← Back to Home", color = Color.White)
+        // Back Button
+        TextButton(
+            onClick = onBack
+        ) {
+            Text(
+                text = "← Back to Home",
+                color = Color.White
+            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Screen Heading
         Text(
             text = "📝 Movie Reviews",
             fontSize = 28.sp,
@@ -86,9 +108,12 @@ fun ReviewScreen(
 
         Spacer(modifier = Modifier.height(30.dp))
 
+        // Review Form Heading
         Text(
             text = if (editingIndex >= 0)
-                "Edit Review" else "Write a Review",
+                "Edit Review"
+            else
+                "Write a Review",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = gold
@@ -96,7 +121,7 @@ fun ReviewScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Movie selection
+        // Movie Selection
         Text(
             text = "Select Movie",
             color = Color.White,
@@ -108,7 +133,9 @@ fun ReviewScreen(
         Box {
 
             OutlinedButton(
-                onClick = { expanded = true },
+                onClick = {
+                    expanded = true
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -119,12 +146,17 @@ fun ReviewScreen(
 
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = {
+                    expanded = false
+                }
             ) {
+
                 sampleMovies.forEach { movie ->
 
                     DropdownMenuItem(
-                        text = { Text(movie.title) },
+                        text = {
+                            Text(movie.title)
+                        },
                         onClick = {
                             selectedMovie = movie.title
                             expanded = false
@@ -136,6 +168,7 @@ fun ReviewScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Star Rating
         Text(
             text = "Your Rating",
             color = Color.White,
@@ -165,10 +198,15 @@ fun ReviewScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Review Text
         OutlinedTextField(
             value = reviewText,
-            onValueChange = { reviewText = it },
-            label = { Text("Write your review") },
+            onValueChange = {
+                reviewText = it
+            },
+            label = {
+                Text("Write your review")
+            },
             placeholder = {
                 Text("What did you think about this movie?")
             },
@@ -190,6 +228,7 @@ fun ReviewScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Save or Update Review
         Button(
             enabled = stars > 0 && reviewText.isNotBlank(),
             onClick = {
@@ -201,8 +240,11 @@ fun ReviewScreen(
                 )
 
                 if (editingIndex in reviews.indices) {
+
                     reviews[editingIndex] = review
+
                 } else {
+
                     reviews.add(review)
                 }
 
@@ -219,15 +261,20 @@ fun ReviewScreen(
             ),
             shape = RoundedCornerShape(16.dp)
         ) {
+
             Text(
                 text = if (editingIndex >= 0)
-                    "Update Review" else "Save Review",
+                    "Update Review"
+                else
+                    "Save Review",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold
             )
         }
 
+        // Cancel Editing
         if (editingIndex >= 0) {
+
             TextButton(
                 onClick = {
                     editingIndex = -1
@@ -236,16 +283,22 @@ fun ReviewScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Cancel Editing", color = Color.White)
+                Text(
+                    text = "Cancel Editing",
+                    color = Color.White
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(35.dp))
 
-        HorizontalDivider(color = Color.White.copy(alpha = 0.5f))
+        HorizontalDivider(
+            color = Color.White.copy(alpha = 0.5f)
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Saved Reviews Heading
         Text(
             text = "My Reviews (${reviews.size})",
             fontSize = 23.sp,
@@ -267,6 +320,7 @@ fun ReviewScreen(
 
             reviews.forEachIndexed { index, review ->
 
+                // Review Card
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -303,33 +357,97 @@ fun ReviewScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row {
+                    // Edit, Delete and Share Buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
 
+                        // Edit Review
                         TextButton(
                             onClick = {
+
                                 selectedMovie = review.movieTitle
                                 stars = review.stars
                                 reviewText = review.comment
                                 editingIndex = index
                             }
                         ) {
-                            Text("Edit", color = gold)
+                            Text(
+                                text = "Edit",
+                                color = gold
+                            )
                         }
 
+                        // Delete Review
                         TextButton(
                             onClick = {
+
                                 reviews.removeAt(index)
 
                                 if (editingIndex == index) {
+
                                     editingIndex = -1
                                     stars = 0
                                     reviewText = ""
+
                                 } else if (editingIndex > index) {
+
                                     editingIndex--
                                 }
                             }
                         ) {
-                            Text("Delete", color = Color.White)
+                            Text(
+                                text = "Delete",
+                                color = Color.White
+                            )
+                        }
+
+                        // NEW FEATURE: Share Review
+                        TextButton(
+                            onClick = {
+
+                                val shareText = """
+                                    🎬 MovieBox Review
+
+                                    Movie: ${review.movieTitle}
+
+                                    Rating:
+                                    ${"★".repeat(review.stars)}${"☆".repeat(5 - review.stars)}
+
+                                    My Review:
+                                    ${review.comment}
+
+                                    Shared from MovieBox
+                                """.trimIndent()
+
+                                val shareIntent =
+                                    Intent(Intent.ACTION_SEND).apply {
+
+                                        type = "text/plain"
+
+                                        putExtra(
+                                            Intent.EXTRA_TEXT,
+                                            shareText
+                                        )
+                                    }
+
+                                val chooserIntent =
+                                    Intent.createChooser(
+                                        shareIntent,
+                                        "Share Movie Review"
+                                    )
+
+                                context.startActivity(
+                                    chooserIntent
+                                )
+                            }
+                        ) {
+                            Text(
+                                text = "↗ Share",
+                                color = gold,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
